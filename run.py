@@ -28,9 +28,9 @@ class GitPush:
 
     def push(self):
 
-       subprocess.call(['git','-C', self.root ,'add','--all'],shell=False)
-       subprocess.call(['git','-C', self.root ,'commit','-m',time.strftime('%Y-%m-%d %H:%M:%S')],shell=False)
-       subprocess.call(['git','-C', self.root ,'push','origin','master'],shell=False)
+       #subprocess.call(['git','-C', self.root ,'add','--all'],shell=False)
+       #subprocess.call(['git','-C', self.root ,'commit','-m',time.strftime('%Y-%m-%d %H:%M:%S')],shell=False)
+       #subprocess.call(['git','-C', self.root ,'push','origin','master'],shell=False)
 
 
 
@@ -60,21 +60,16 @@ class logWriter:
 	self.gitWriter.push()
         self.lock.release()
 
+class upload(threading.Thread):
 
-class CallBack:
+    def __init__(self,_toWrite,_log):
+        self.toWrite = _toWrite
+        self.log = _log
 
-	def __init__(self,_log):
-		self.count = 0
-                self.log = _log
+    def run(self):
+        # This is a blocking call
+        log.writeLnToLog(self.toWrite)
 
-	def callback(self,pir):
- 		self.count += 1
- 		print str(self.count) + " Motion Detected"
-                self.log.writeLnToLog(time.strftime('%Y-%m-%d %H:%M:%S') + ', - Detected - Count : ,' + str(self.count))
-
-# Need to use global variables because add_event_detect doesn't work well
-# with object methods as callbacks
-count = 0
 
 # The main write lock
 writeLock = thread.allocate_lock()
@@ -82,13 +77,11 @@ writeLock = thread.allocate_lock()
 # Create the log file
 log =  logWriter(writeLock)
 
-# The main function
-cObj = CallBack(log)
-
 runProgram = 1
 tFile = None
 text = ""
 temp = ""
+tRef = None
 
 while runProgram :
 
@@ -96,8 +89,9 @@ while runProgram :
 		while 1:
                        tFile = open('/sys/bus/w1/devices/28-000004f538aa/w1_slave','r')
                        text = tFile.read()
-                       temp = re.search('t=(.*)').group(0)
-                       print(temp)
+                       temp = re.search('t=(.*)',text).group(1)
+                       tRef = upload(time.strftime('%Y-%m-%d %H:%M:%S') + ',' + temp,log)
+                       tRef.start()
                        tFile.close()
 		       time.sleep(5)
 
