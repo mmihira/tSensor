@@ -11,8 +11,15 @@
   IdentityFile ~/.ssh/id_rsa
 - Change Rasberry to whatever you commented the key with for consistency
 - Install git if not allready installed
-- 
-
+- git clone git@github.com-user1:user1/your-repo-name.git your-repo-name_user1
+  replace user1 with the github username
+  replace your-repo-name with the reponame
+- cd into the cloned directory and specify the user and email :
+  git config user.name "user1"
+  git config user.email "zlayser@hotmail.com"
+- All git commands should now work on that respository with no need to enter 
+  a username or password
   
+
 
 
