@@ -4,6 +4,7 @@ import time
 import thread
 import threading
 import re
+from random import randint
 
 #!/usr/bin python 
 import time
@@ -21,16 +22,15 @@ print "Detecting Motion"
 class GitPush:
 
     def __init__(self):
-
         self.root = "~/tData_mmihira2/"
         self.root = expanduser(self.root)
 
 
     def push(self):
 
-       #subprocess.call(['git','-C', self.root ,'add','--all'],shell=False)
-       #subprocess.call(['git','-C', self.root ,'commit','-m',time.strftime('%Y-%m-%d %H:%M:%S')],shell=False)
-       #subprocess.call(['git','-C', self.root ,'push','origin','master'],shell=False)
+       subprocess.call(['git','-C', self.root ,'add','--all'],shell=False)
+       subprocess.call(['git','-C', self.root ,'commit','-m',time.strftime('%Y-%m-%d %H:%M:%S')],shell=False)
+       subprocess.call(['git','-C', self.root ,'push','origin','HEAD:dataTest'],shell=False)
 
 
 
@@ -55,14 +55,16 @@ class logWriter:
 
     def writeLnToLog(self, msg):
         self.lock.acquire()
-        self.log.write(msg + '\n')
+        self.log.write(msg +  '\n')
         self.log.flush()
+	# Notice the log file is never closed
 	self.gitWriter.push()
         self.lock.release()
 
 class upload(threading.Thread):
 
     def __init__(self,_toWrite,_log):
+	threading.Thread.__init__(self)
         self.toWrite = _toWrite
         self.log = _log
 
@@ -93,7 +95,7 @@ while runProgram :
                        tRef = upload(time.strftime('%Y-%m-%d %H:%M:%S') + ',' + temp,log)
                        tRef.start()
                        tFile.close()
-		       time.sleep(5)
+		       time.sleep(60)
 
 
 		
