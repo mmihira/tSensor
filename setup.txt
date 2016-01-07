@@ -1,0 +1,18 @@
+- Generate SSH key according to github guide. Instructions can be found
+  by googling "Github generating SSH keys"
+- To get ssh-agent working type in eval "$(ssh-agent -s)"
+- type in $SSH_AGENT_PID and make sure the number matches the process
+  created for the ssh-agent
+- In ~/.ssh/ create a file called config
+- Paste the below into the file
+  Host github-<github username>
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_rsa
+- Change Rasberry to whatever you commented the key with for consistency
+- Install git if not allready installed
+- 
+
+  
+
+
