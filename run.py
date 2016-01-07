@@ -3,6 +3,7 @@
 import time
 import thread
 import threading
+import re
 
 #!/usr/bin python 
 import time
@@ -86,15 +87,19 @@ cObj = CallBack(log)
 
 runProgram = 1
 tFile = None
+text = ""
+temp = ""
 
 while runProgram :
 
 	try:
 		while 1:
                        tFile = open('/sys/bus/w1/devices/28-000004f538aa/w1_slave','r')
-                       print(tFile.read())
+                       text = tFile.read()
+                       temp = re.search('t=(.*)').group(0)
+                       print(temp)
                        tFile.close()
-		       time.sleep(5000)
+		       time.sleep(5)
 
 
 		
