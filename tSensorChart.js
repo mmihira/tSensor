@@ -30,12 +30,13 @@ tSensor.responsive = function(){
 
     var dynWidth = window.innerWidth;
 
+    var maxTick = 16;
     var tickScale = d3.scale.linear()
                     .domain([300,1920])
-                    .range([3,20]);
+                    .range([3,maxTick]);
 
     if( dynWidth > 1920){
-        tSensor.numberOfTicks = 20;
+        tSensor.numberOfTicks = maxTick;
     }else{
         tSensor.numberOfTicks = parseInt(tickScale(dynWidth));
     }
@@ -54,7 +55,7 @@ tSensor.responsive = function(){
     }else{
 
         tSensor.fontSize = parseInt(fontScale(dynWidth));
-        tSensor.xfontSize = parseInt(fontScale(dynWidth)) -3;
+        tSensor.xfontSize = parseInt(fontScale(dynWidth)) - 2;
 
     }
 
