@@ -1,0 +1,19 @@
+.tChart{
+    padding:5%;
+}
+
+.axis {
+    font: 20px sans-serif;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.x.axis path {
+    display: none;
+}
+
