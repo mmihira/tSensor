@@ -32,7 +32,7 @@ class GitWriter:
        self.root = expanduser(self.root)
        subprocess.call(['git','-C', self.root ,'config','user.name','mmihira2'],shell=False)
        subprocess.call(['git','-C', self.root ,'config','user.email','zlayser@hotmail.com'],shell=False)
-
+       self.tidyGit()
 
     def addCommit(self):
        subprocess.call(['git','-C', self.root ,'add','--all'],shell=False)
@@ -72,15 +72,23 @@ class logWriter:
 
     def writeLnToLog(self, msg):
         self.lock.acquire()
-	self.log = open('/home/pi/tData/data.txt','w')
+	self.log = open('/home/pi/tData/data.js','w')
 	self.que.append(msg)
 
 	global dataFileLen
 	if len(self.que) > dataFileLen:
 		self.que.popleft()
 
+	self.log.write('tData=[');
+	strBuffer = []
 	for i in self.que:
-		self.log.write(i + '\n')
+		strBuffer.append('"')
+		strBuffer.append(i)
+		strBuffer.append('"')
+		strBuffer.append(',')
+	strBuffer.pop()
+	strBuffer.append('];')
+	self.log.write("".join(strBuffer))
 
         self.log.flush()
 	self.log.close()
@@ -137,7 +145,6 @@ while runProgram :
 		
 	except KeyboardInterrupt:
 		print "Exiting"
-		GPIO.cleanup()
 		runProgram = 0
 
 	except RuntimeError, e:
@@ -147,7 +154,6 @@ while runProgram :
 			print "Retrying"
 		else:
 			print 'Exiting for unknown error : ' + e.message
-			GPIO.cleanup()
 			runProgram = 0
 
 
