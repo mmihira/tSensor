@@ -72,7 +72,7 @@ tSensor.responsive = function(){
     }
 
     // Let the margin take up 10% of the width (on both sides) 
-    tSensor.jcMarginTopBot = dynWidth * 0.05;
+    tSensor.jcMarginTopBot = dynWidth * 0.1;
     tSensor.jcMarginLeftRight = dynWidth * 0.1;
 
 
