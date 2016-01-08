@@ -12,13 +12,13 @@ tSensor = {};
  */
 tSensor.formatData = function(){
 
-    var reg = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}),(.*)/
+    var reg = /(.*),(.*)/
 
     tSensor.data = tData.map(function(e){
         var parsed = reg.exec(e);
 
-        return {date:new Date(parsed[1],parseInt(parsed[2])-1,parsed[3],parsed[4],parsed[5],parsed[6]),
-                value:parseFloat(parsed[7])/1000}
+        return {date:parsed[1],
+                value:parseFloat(parsed[2])/1000}
 
     });
 
@@ -110,7 +110,7 @@ tSensor.tempChart = function(){
         height = tSensor.jcHeight - margin.top - margin.bottom;
     
     // How to parse the date value
-    var parseDate = d3.time.format("%d/%m/%Y, %X %p").parse;
+    var parseDate = d3.time.format("%Y-%m-%d %X").parse;
     
     var _data = tSensor.data.map(function(e){return {date:parseDate(e.date.toLocaleString()),value:e.value};});
     
