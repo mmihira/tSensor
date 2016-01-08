@@ -28,7 +28,7 @@ tSensor.formatData = function(){
 // The responsive function to detect screen resolution and adapt accordingly
 tSensor.responsive = function(){
 
-    var dynWidth = window.innerWidth;
+    var dynWidth = window.innerWidth * 0.7;
 
     var maxTick = 16;
     var tickScale = d3.scale.linear()
@@ -89,7 +89,7 @@ tSensor.responsive = function(){
     }
 
     // Let the margin take up 10% of the width (on both sides) 
-    tSensor.lngMarginTopBot = dynWidth * 0.05;
+    tSensor.lngMarginTopBot = dynWidth * 0.005;
     tSensor.lngMarginLeftRight = dynWidth * 0.1;
 
     tSensor.legendRectSize = tSensor.lngWidth * .01;
@@ -106,8 +106,8 @@ tSensor.tempChart = function(){
                   bottom: tSensor.jcMarginTopBot, 
                   left: tSensor.jcMarginLeftRight},
 
-        width = tSensor.jcWidth - margin.left - margin.right,
-        height = tSensor.jcHeight - margin.top - margin.bottom;
+        width = tSensor.jcWidth ,
+        height = tSensor.jcHeight ;
     
     // How to parse the date value
     var parseDate = d3.time.format("%Y-%m-%d %X").parse;
@@ -144,7 +144,7 @@ tSensor.tempChart = function(){
     var svg = d3.select("#tChart").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
-        .attr("float","left")
+        //.attr("style",'display:block,margins:auto')
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
