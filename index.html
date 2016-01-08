@@ -28,7 +28,12 @@
             tSensor.responsive();
             tSensor.tempChart();
             
-            d3.select(window).on('resize',function(){tSensor.responsive();tSensor.tempChart();} ); 
+            d3.select(window).on('resize',function(){
+                    if(window.innerWidth > 300){
+                        tSensor.responsive();
+                        tSensor.tempChart();
+                        } 
+            }); 
     </script>
 </html>
 
