@@ -5,6 +5,7 @@ import thread
 import threading
 import re
 from random import randint
+from collections import deque
 
 #!/usr/bin python 
 import time
@@ -14,50 +15,83 @@ import subprocess
 from os.path import expanduser,join,splitext
 
 
+# Define Global Config
+# Number of reading before cleaning repo
+noCountBeforeResetClean = 2880
 
-print "Waiting for sensor to settle"
-time.sleep(2)
-print "Detecting Motion"
+# Seconds between temperature measurement
+measureInterval = 60
 
-class GitPush:
+# Target reading number to have in the data file
+dataFileLen = 2880
+
+class GitWriter:
 
     def __init__(self):
-        self.root = "~/tData_mmihira2/"
-        self.root = expanduser(self.root)
+       self.root = "~/tData/"
+       self.root = expanduser(self.root)
+       subprocess.call(['git','-C', self.root ,'config','user.name','mmihira2'],shell=False)
+       subprocess.call(['git','-C', self.root ,'config','user.email','zlayser@hotmail.com'],shell=False)
+
+
+    def addCommit(self):
+       subprocess.call(['git','-C', self.root ,'add','--all'],shell=False)
+       subprocess.call(['git','-C', self.root ,'commit','-m',time.strftime('%Y-%m-%d %H:%M:%S')],shell=False)
 
 
     def push(self):
 
-       subprocess.call(['git','-C', self.root ,'add','--all'],shell=False)
-       subprocess.call(['git','-C', self.root ,'commit','-m',time.strftime('%Y-%m-%d %H:%M:%S')],shell=False)
-       subprocess.call(['git','-C', self.root ,'push','origin','HEAD:dataTest'],shell=False)
+       self.addCommit()
+       subprocess.call(['git','-C', self.root ,'push','origin','HEAD:data'],shell=False)
+       pass
 
+    def tidyGit(self):
+       subprocess.call(['git','-C', self.root ,'reset','--hard','ebfdb4a7'],shell=False)
+       subprocess.call(['git','-C', self.root ,'clean','-df'],shell=False)
+       subprocess.call(['git','-C', self.root ,'gc'],shell=False)
+       self.addCommit()
+       subprocess.call(['git','-C', self.root ,'push','-f','origin','HEAD:data'],shell=False)
 
-
-
-"""
-logWriter is a asychronous file writer
-which logs all detected movement to a 
-text file. Also it will push these changes
-to a specified remote directory
-
-A thread.lock object is passed in as
-argument which each thread that references
-this writer will acquire before writing
-"""
 class logWriter:
+    """
+    logWriter is a asychronous file writer
+    which logs all detected movement to a 
+    text file. Also it will push these changes
+    to a specified remote directory
 
-    def __init__(self,_lock):
-        self.log = open('/home/pi/tData_mmihira2/data.txt','w')
-        self.log.write('-- Starting log\n')
+    A thread.lock object is passed in as
+    argument which each thread that references
+    this writer will acquire before writing
+    """
+
+    def __init__(self,_lock,_que):
         self.lock = _lock
-	self.gitWriter = GitPush()
+	self.gitWriter = GitWriter()
+	self.que = _que
+	self.count = 0
 
     def writeLnToLog(self, msg):
         self.lock.acquire()
-        self.log.write(msg +  '\n')
+	self.log = open('/home/pi/tData/data.txt','w')
+	self.que.append(msg)
+
+	global dataFileLen
+	if len(self.que) > dataFileLen:
+		self.que.popleft()
+
+	for i in self.que:
+		self.log.write(i + '\n')
+
         self.log.flush()
-	# Notice the log file is never closed
+	self.log.close()
+
+	self.count += 1
+
+	global noCountBeforeResetClean
+        if self.count > noCountBeforeResetClean:
+            self.gitWriter.tidyGit()
+            self.count = 0
+
 	self.gitWriter.push()
         self.lock.release()
 
@@ -76,14 +110,15 @@ class upload(threading.Thread):
 # The main write lock
 writeLock = thread.allocate_lock()
 
+# The contents of the data file
+dataQue = deque()
+
 # Create the log file
-log =  logWriter(writeLock)
+log =  logWriter(writeLock,dataQue)
 
 runProgram = 1
-tFile = None
-text = ""
-temp = ""
-tRef = None
+
+
 
 while runProgram :
 
@@ -95,7 +130,8 @@ while runProgram :
                        tRef = upload(time.strftime('%Y-%m-%d %H:%M:%S') + ',' + temp,log)
                        tRef.start()
                        tFile.close()
-		       time.sleep(60)
+		       
+		       time.sleep(measureInterval)
 
 
 		
