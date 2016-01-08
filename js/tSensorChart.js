@@ -146,7 +146,7 @@ tSensor.tempChart = function(){
         .attr("height", height + margin.top + margin.bottom)
         //.attr("style",'display:block,margins:auto')
       .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform", "translate(" + margin.left + "," + (margin.top*.5) + ")");
     
     var line = d3.svg.line()
         .interpolate("basis")
