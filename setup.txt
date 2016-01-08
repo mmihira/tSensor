@@ -1,24 +1,36 @@
 - Generate SSH key according to github guide. Instructions can be found
   by googling "Github generating SSH keys"
-- To get ssh-agent working type in eval "$(ssh-agent -s)"
+
+- To get ssh-agent working type in eval "$(ssh-agent -s)". This
+  ensure that we export the environment variables ssh-agent spits out.
+
 - type in $SSH_AGENT_PID and make sure the number matches the process
   created for the ssh-agent
+
 - In ~/.ssh/ create a file called config
+
 - Paste the below into the file
-  Host github-<github username>
+  Host github-user
   HostName github.com
   User git
   IdentityFile ~/.ssh/id_rsa
-- Change Rasberry to whatever you commented the key with for consistency
-- Install git if not allready installed
-- git clone git@github.com-user1:user1/your-repo-name.git your-repo-name_user1
-  replace user1 with the github username
-  replace your-repo-name with the reponame
+
+- Change user to whatever you commented the key with for consistency.
+
+- Install git if not allready installed.
+
+- Next clone the git repo we want to push to:
+  git clone git@github.com-user:user/your-repo-name.git name-for-folder
+  Replace user with the github username
+  Replace your-repo-name with the reponame
+  Replace name-for-folder with the name of the folder required
+
 - cd into the cloned directory and specify the user and email :
-  git config user.name "user1"
-  git config user.email "zlayser@hotmail.com"
+  git config user.name "user"
+  git config user.email "emailAddress@gmail.com"
+
 - All git commands should now work on that respository with no need to enter 
-  a username or password
+  a username or password.
   
 
 
