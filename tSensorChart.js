@@ -54,7 +54,7 @@ tSensor.responsive = function(){
     }else{
 
         tSensor.fontSize = parseInt(fontScale(dynWidth));
-        tSensor.xfontSize = parseInt(fontScale(dynWidth)) -2;
+        tSensor.xfontSize = parseInt(fontScale(dynWidth)) -3;
 
     }
 
