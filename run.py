@@ -92,14 +92,14 @@ class DataWriter:
         self.lock.release()
 
 class UploadThread(threading.Thread):
-    def __init__(self,_toWrite,_log):
+    def __init__(self, toWrite, log):
 	threading.Thread.__init__(self)
-        self.toWrite = _toWrite
-        self.log = _log
+        self.toWrite = toWrite
+        self.log = log
 
     def run(self):
         # This is a blocking call
-        log.writeLnToLog(self.toWrite)
+        self.log.writeLnToLog(self.toWrite)
 
 class Monitor:
     # Seconds between temperature measurement
@@ -118,9 +118,9 @@ class Monitor:
                 while True:
                    tFile = open('/sys/bus/w1/devices/28-000004f538aa/w1_slave','r')
                    text = tFile.read()
-                   temp = re.search('t=(.*)',text).group(1)
+                   temperature = re.search('t=(.*)', text).group(1)
 
-                   threadRef = UploadThread(time.strftime('%Y-%m-%d %H:%M:%S') + ',' + temp, self.log)
+                   threadRef = UploadThread(time.strftime('%Y-%m-%d %H:%M:%S') + ',' + temperature, self.log)
                    threadRef.start()
 
                    tFile.close()
