@@ -137,5 +137,5 @@ class Monitor:
                     print 'Exiting for unknown error : ' + e.message
                     exit(1)
 
-Monitor.run()
+Monitor().run()
 
