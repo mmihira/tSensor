@@ -1,26 +1,15 @@
-#!/usr/bin python 
+#!/usr/bin python
 
 import time
 import thread
 import threading
 import re
-from random import randint
 from collections import deque
-
-#!/usr/bin python 
-import time
-import thread
-import threading
+from os.path import expanduser, join, splitext
 import subprocess
-from os.path import expanduser,join,splitext
 
-
-# Define Global Config
 # Number of reading before cleaning repo
 noCountBeforeResetClean = 2880
-
-# Seconds between temperature measurement
-measureInterval = 60
 
 # Target reading number to have in the data file
 dataFileLen = 2880
@@ -52,22 +41,21 @@ class GitWriter:
        self.addCommit()
        subprocess.call(['git','-C', self.root ,'push','-f','origin','HEAD:data'],shell=False)
 
-class logWriter:
+class DataWriter:
     """
-    logWriter is a asychronous file writer
-    which logs all detected movement to a 
-    text file. Also it will push these changes
-    to a specified remote directory
+    DataWriter is a asychronous file writer which both writes
+    the latest information to local cache and also writes
+    the latest data to the git repository.
 
     A thread.lock object is passed in as
     argument which each thread that references
-    this writer will acquire before writing
+    this writer will acquire before writing.
     """
 
-    def __init__(self,_lock,_que):
-        self.lock = _lock
+    def __init__(self, lock, que):
+        self.lock = lock
 	self.gitWriter = GitWriter()
-	self.que = _que
+	self.que = que
 	self.count = 0
 
     def writeLnToLog(self, msg):
@@ -103,8 +91,7 @@ class logWriter:
 	self.gitWriter.push()
         self.lock.release()
 
-class upload(threading.Thread):
-
+class UploadThread(threading.Thread):
     def __init__(self,_toWrite,_log):
 	threading.Thread.__init__(self)
         self.toWrite = _toWrite
@@ -114,52 +101,41 @@ class upload(threading.Thread):
         # This is a blocking call
         log.writeLnToLog(self.toWrite)
 
+class Monitor:
+    # Seconds between temperature measurement
+    sleepDelay = 60
 
-# The main write lock
-writeLock = thread.allocate_lock()
+    def __init__(self):
+        # The contents of the data file
+        self.dataQue = deque()
+        # The main write lock
+        self.writeLock = thread.allocate_lock()
+        self.log = DataWriter(self.writeLock, self.dataQue)
 
-# The contents of the data file
-dataQue = deque()
+    def run():
+        while True:
+            try:
+                while True:
+                   tFile = open('/sys/bus/w1/devices/28-000004f538aa/w1_slave','r')
+                   text = tFile.read()
+                   temp = re.search('t=(.*)',text).group(1)
 
-# Create the log file
-log =  logWriter(writeLock,dataQue)
+                   threadRef = UploadThread(time.strftime('%Y-%m-%d %H:%M:%S') + ',' + temp, self.log)
+                   threadRef.start()
 
-runProgram = 1
+                   tFile.close()
+                   time.sleep(Monitor.sleepDelay)
 
+            except KeyboardInterrupt:
+                print "Exiting"
+                exit(0)
+            except RuntimeError, e:
+                if e.message == 'Failed to add edge detection' :
+                    print e.message
+                    print "Retrying"
+                else:
+                    print 'Exiting for unknown error : ' + e.message
+                    exit(1)
 
-
-while runProgram :
-
-	try:
-		while 1:
-                       tFile = open('/sys/bus/w1/devices/28-000004f538aa/w1_slave','r')
-                       text = tFile.read()
-                       temp = re.search('t=(.*)',text).group(1)
-                       tRef = upload(time.strftime('%Y-%m-%d %H:%M:%S') + ',' + temp,log)
-                       tRef.start()
-                       tFile.close()
-		       
-		       time.sleep(measureInterval)
-
-
-		
-	except KeyboardInterrupt:
-		print "Exiting"
-		runProgram = 0
-
-	except RuntimeError, e:
-
-		if e.message == 'Failed to add edge detection' :
-			print e.message
-			print "Retrying"
-		else:
-			print 'Exiting for unknown error : ' + e.message
-			runProgram = 0
-
-
-
-
-
-
-
+Monitor.run()
 
