@@ -112,7 +112,7 @@ class Monitor:
         self.writeLock = thread.allocate_lock()
         self.log = DataWriter(self.writeLock, self.dataQue)
 
-    def run():
+    def run(self):
         while True:
             try:
                 while True:
